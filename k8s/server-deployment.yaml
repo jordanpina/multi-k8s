@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deploymnet
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: server
+  template:
+    metadata:
+      labels:
+        component: server
+    spec:
+      containers:
+        - name: server
+          image: jordanpina/multi-server
+          ports:
+            - containerPort: 5000
+          env:
+            - name: REDIS_HOST
+              # name of the clusterIP service
+              value: redis-cluster-ip-service
+              # get this information from the redis-cluster-ip-service.yaml
+            - name: REDIS_PORT
+              value: '6379'
+              # default postgres user
+              # not good for real production but fine for this demo
+            - name: PGUSER
+              value: postgres
+            - name: PGHOST
+              # host name we want to connect to
+              value: postgres-cluster-ip-service
+            - name: PGPORT
+              value: '5432'
+              # default pg database
+            - name: PGDATABASE  
+              value: postgres
+              # name here is the name of the environment variable
+              # deployment will use for this value
+            - name: PGPASSWORD
+              # get the value from the configuration we provide here
+              valueFrom:
+                secretKeyRef:
+                  # name of the secrete we want to get the value from
+                  name: pgpassword
+                  key: PGPASSWORD

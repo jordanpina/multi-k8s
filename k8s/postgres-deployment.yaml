@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: postgres
+  template:
+    metadata:
+      labels:
+        component: postgres
+    spec:
+      # allocates the storage 
+      volumes:
+        - name: postgres-storage
+          # tells kubernetes where to find our PVC
+          persistentVolumeClaim:
+            claimName: database-persistent-volumne-claim
+      containers:
+        - name: postgres
+          image: postgres
+          env: 
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgpassword
+                  key: PGPASSWORD
+          ports:
+            - containerPort: 5432
+          # now that we have access to storage 
+          # this is how I want it to be used inside
+          # my container 
+          volumeMounts:
+          # go find this particular storage for my volumeMount
+           - name: postgres-storage
+              # where inside the container the storage will
+              # be made available
+            # this path is the default path for storing data
+            # in your projects
+             mountPath: /var/lib/postgresal/data
+             # inside the path above
+             # data will be stored in a directory called postgres
+             # this sub folder is not always needed but it is needed
+             # if you are using a postgres database
+             subPath: postgres
+

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: worker
+  template:
+    metadata:
+      labels:
+        component: worker
+    spec:
+      containers:
+        - name: worker
+          image: jordanpina/multi-worker
+          # env is for enviornment variables
+          env:
+            - name: REDIS_HOST
+              # name of the clusterIP service
+              value: redis-cluster-ip-service
+              # get this information from the redis-cluster-ip-service.yaml
+            - name: REDIS_PORT
+              value: '6379'
+
